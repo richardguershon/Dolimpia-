@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dolimpia – Tout sèvis pou kay ou</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<style>
+:root{color-scheme:light;--navy:#0b2545;--navy2:#13315c;--mint:#2fbf8f;--mintbg:#e6f8f1;--mintx:#0f7a58;--bg:#f6f9fc;--card:#fff;--tx:#0f1f33;--mu:#5b6b7f;--bd:#e2e8f0;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0a1424;--card:#111e33;--tx:#eaf1fb;--mu:#9fb0c6;--bd:#223350;--mintbg:#0f2e2a;--mintx:#5fe0b2}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0a1424;--card:#111e33;--tx:#eaf1fb;--mu:#9fb0c6;--bd:#223350;--mintbg:#0f2e2a;--mintx:#5fe0b2}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;margin:0}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:1rem}
+.mu{color:var(--mu)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;font-weight:700;border-radius:.9rem;padding:.8rem 1.1rem;transition:transform .1s}
+.btn:active{transform:scale(.97)}
+.btn-mint{background:var(--mint);color:#06281d}
+.btn-navy{background:var(--navy);color:#fff}
+.btn-out{border:2px solid var(--mint);color:var(--mintx)}
+.inp{width:100%;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:.75rem;padding:.7rem .8rem;font-size:1rem}
+.inp:focus{outline:2px solid var(--mint)}
+.chip{white-space:nowrap;border:1px solid var(--bd);background:var(--card);border-radius:999px;padding:.45rem .85rem;font-size:.85rem;font-weight:600}
+.chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.hero{background:linear-gradient(160deg,#0b2545,#13315c 60%,#0f6b57);color:#fff}
+.vb{display:inline-flex;align-items:center;gap:.25rem;background:#1d4ed8;color:#fff;font-size:.72rem;font-weight:800;padding:.2rem .55rem;border-radius:999px;margin-top:.25rem;box-shadow:0 1px 4px rgba(29,78,216,.45)}
+.sheet{animation:up .22s ease-out}@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+</style>
+</head>
+<body>
+<header class="sticky top-0 z-20 bg-[#0b2545] text-white" style="padding-top:env(safe-area-inset-top,0px)">
+  <div class="max-w-3xl mx-auto flex items-center justify-between px-4 py-3">
+    <a href="#akey" class="flex items-center gap-2 font-extrabold text-xl"><span class="w-8 h-8 rounded-xl bg-[#2fbf8f] text-[#06281d] grid place-items-center">D</span>Dolimpia</a>
+    <nav class="flex gap-2 text-sm font-semibold">
+      <a href="#chache" class="px-2.5 py-2 rounded-lg hover:bg-white/10">Chèche</a>
+      <a href="#vip" class="px-2.5 py-2 rounded-lg hover:bg-white/10 text-[#ffd76a]">👑 VIP</a>
+      <a href="#enskripsyon" class="px-3 py-2 rounded-lg bg-[#2fbf8f] text-[#06281d]">Enskri gratis</a>
+    </nav>
+  </div>
+  <div id="vb" class="hidden text-center text-xs font-bold py-1.5 px-3" style="background:linear-gradient(90deg,#ffd76a,#2fbf8f);color:#0b2545"></div>
+</header>
+
+<main id="app" class="max-w-3xl mx-auto px-4 pb-24"></main>
+
+<footer class="text-center text-xs mu pb-8 px-4">© 2026 Dolimpia · Fèt pou Ayiti 🇭🇹 · Vèsyon 1 (demo)</footer>
+
+<div id="modal" class="hidden fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center"></div>
+
+<script>
+const CATS=[
+ {id:"menaje",nom:"Fanm menajèz",ico:"🧹"},
+ {id:"nounou",nom:"Nounou (gadyen timoun)",ico:"🧸"},
+ {id:"kizin",nom:"Kizinyèz / Kizinye",ico:"🍲"},
+ {id:"lesiv",nom:"Lesivyè / Repasèz",ico:"👕"},
+ {id:"granmoun",nom:"Swen granmoun aje",ico:"🤝"}
+];
+const DEPT={
+ "Lwès":["Pétion-Ville","Delmas","Pòtoprens","Tabarre","Kenscoff","Kafou"],
+ "Nò":["Okap","Limonad","Milo","Plèn di Nò"],
+ "Latibonit":["Gonayiv","Sen Mak","Dèlin","Ench"],
+ "Sid":["Okay","Torbèk","Sen Lwi di Sid","Aken"],
+ "Grandans":["Jérémie","Dame-Marie","Anso-a-Pitr"],
+ "Sant":["Ench","Mibalè","Lascahobas","Hinche"],
+ "Nòdès":["Fòlibète","Wanament","Twou di Nò"],
+ "Nòdwès":["Pòdepè","Jean-Rabel","Mòl Sen Nikola"],
+ "Sidès":["Jakmèl","Bainet","Marigot"],
+ "Nip":["Miragoàn","Anse-à-Veau","Baradères"]
+};
+const PRIX=500,VIP=2500,DAYS=30,VER=250;
+const byVer=(a,b)=>(b.ver?1:0)-(a.ver?1:0);
+let vipExp=0;try{vipExp=+localStorage.getItem("dol_vip")||0}catch(e){}
+const isVip=()=>Date.now()<vipExp;
+const daysLeft=()=>Math.ceil((vipExp-Date.now())/864e5);
+function badge(){const b=$("#vb");if(isVip()){b.classList.remove("hidden");b.innerHTML=`👑 Manm VIP · tout nimewo debloke · ${daysLeft()} jou ki rete`}else b.classList.add("hidden")}
+let PROS=[
+ {id:1,nom:"Marie-Claire Joseph",cat:"menaje",dep:"Lwès",kom:"Pétion-Ville",an:8,note:4.8,av:23,tel:"509 37 12 3456",bio:"Menajèz serye ak pwòp. Mwen travay kay fanmi depi 8 an, disponib 5 jou pa semèn."},
+ {id:2,ver:1,nom:"Nadège Pierre",cat:"nounou",dep:"Nò",kom:"Okap",an:6,note:4.9,av:31,tel:"509 37 45 6789",bio:"Mwen renmen timoun anpil. Fòmasyon premye swen. Mwen ka dòmi kay la si sa nesesè."},
+ {id:3,nom:"Jean-Robert Louis",cat:"kizin",dep:"Latibonit",kom:"Gonayiv",an:10,note:4.7,av:18,tel:"509 37 78 9012",bio:"Kizinye pwofesyonèl, mwen konn manje tradisyonèl ayisyen ak manje entènasyonal."},
+ {id:4,nom:"Rosemène Désir",cat:"lesiv",dep:"Sidès",kom:"Jakmèl",an:5,note:4.6,av:12,tel:"509 37 23 4567",bio:"Mwen lave, seche epi repase rad ak anpil swen. Livrezon posib nan vil la."},
+ {id:5,ver:1,nom:"Yolande Baptiste",cat:"granmoun",dep:"Lwès",kom:"Delmas",an:12,note:5.0,av:27,tel:"509 37 56 7890",bio:"Ansyen enfimyè otonòm. Mwen akonpanye granmoun aje, bay medikaman ak kenbe yo konpayi."},
+ {id:6,nom:"Fedner Charles",cat:"kizin",dep:"Sid",kom:"Okay",an:7,note:4.5,av:9,tel:"509 37 90 1234",bio:"Mwen kuit pou fanmi ak evènman. Pwòp, ponktyèl epi ak bon prix."}
+];
+const un=new Set();try{JSON.parse(localStorage.getItem("dol_un")||"[]").forEach(x=>un.add(x))}catch(e){}
+const st={cat:"",dep:"",kom:""};
+const $=s=>document.querySelector(s), app=$("#app");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const catOf=id=>CATS.find(c=>c.id===id);
+const ini=n=>n.split(/[\s-]+/).slice(0,2).map(w=>w[0]).join("").toUpperCase();
+const hues=[160,200,215,175,190,150];
+const mask=()=>"509 37** ****";
+
+function stars(n){return `<span class="text-amber-500 font-bold">★ ${n.toFixed(1)}</span>`}
+function card(p){
+  const open=un.has(p.id)||isVip(),c=catOf(p.cat);
+  return `<article class="card p-4 flex gap-3" ${p.ver?'style="border:2px solid #2563eb"':""}>
+   <div class="w-16 h-16 shrink-0 rounded-2xl grid place-items-center text-white font-extrabold text-xl" style="background:linear-gradient(135deg,hsl(${hues[p.id%6]},60%,32%),hsl(${hues[p.id%6]},65%,45%))">${ini(p.nom)}</div>
+   <div class="min-w-0 flex-1">
+     <h3 class="font-bold leading-tight">${esc(p.nom)}</h3>
+     ${p.ver?`<span class="vb">Idantite Verifye ✓</span> <span class="text-xs font-bold text-amber-500">⭐ Rekòmande</span>`:""}
+     <p class="text-sm" style="color:var(--mintx)">${c.ico} ${c.nom}</p>
+     <p class="text-sm mu mt-1">📍 ${esc(p.kom)}, ${esc(p.dep)} · ${p.an} an eksperyans</p>
+     <p class="text-sm mt-1">${stars(p.note)} <span class="mu">(${p.av} evalyasyon)</span></p>
+     <p class="text-sm mu mt-2 line-clamp-2">${esc(p.bio)}</p>
+     <div class="mt-3 flex items-center gap-2 flex-wrap">
+      ${open?`<a href="tel:+${p.tel.replace(/\D/g,"")}" class="btn btn-mint !py-2 text-sm">📞 ${p.tel}</a>`
+      :`<span class="font-mono text-sm px-3 py-2 rounded-lg" style="background:var(--mintbg)">🔒 ${mask()}</span>
+        <button class="btn btn-navy !py-2 text-sm" onclick="pay(${p.id})">Debloke Nimewo (${PRIX} HTG)</button>`}
+     </div>
+   </div></article>`;
+}
+
+function home(){
+  app.innerHTML=`
+  <section class="hero rounded-3xl mt-4 p-6 sm:p-10">
+    <p class="text-[#7ff0c6] font-semibold text-sm">🇭🇹 Nan 10 depatman Ayiti</p>
+    <h1 class="text-4xl sm:text-5xl font-extrabold mt-2">Dolimpia</h1>
+    <p class="text-lg sm:text-xl mt-2 text-white/90">Tout sèvis pou kay ou, nan yon sèl klik</p>
+    <div class="mt-6 grid gap-3 sm:grid-cols-2">
+      <a href="#chache" class="btn btn-mint text-lg !py-4">🏠 Mwen se yon Patwon</a>
+      <a href="#enskripsyon" class="btn text-lg !py-4 bg-white text-[#0b2545]">👷 Mwen se yon Travayè</a>
+    </div>
+    <p class="text-sm text-white/70 mt-3">Wè pwofil yo gratis. Peye ${PRIX} HTG sèlman pou debloke yon nimewo.</p>
+  </section>
+
+  <h2 class="font-extrabold text-xl mt-8 mb-3">Kategori sèvis</h2>
+  <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+    ${CATS.map(c=>`<button onclick="st.cat='${c.id}';location.hash='chache'" class="card p-4 text-left active:scale-95 transition">
+      <div class="text-3xl">${c.ico}</div><div class="font-bold mt-2 text-sm">${c.nom}</div></button>`).join("")}
+  </div>
+
+  <h2 class="font-extrabold text-xl mt-8 mb-3">Kijan sa mache</h2>
+  <ol class="grid gap-3 sm:grid-cols-3">
+    ${[["1","Chwazi sèvis ak kote ou ye","Pa depatman ak komin."],["2","Gade pwofil yo gratis","Foto, eksperyans ak evalyasyon."],["3","Debloke nimewo a",`${PRIX} HTG via MonCash / NatCash, epi rele touswit.`]].map(s=>`<li class="card p-4"><span class="w-8 h-8 rounded-full grid place-items-center font-bold" style="background:var(--mint);color:#06281d">${s[0]}</span><p class="font-bold mt-2">${s[1]}</p><p class="text-sm mu">${s[2]}</p></li>`).join("")}
+  </ol>
+
+  <div class="flex items-center justify-between mt-8 mb-3"><h2 class="font-extrabold text-xl">Travayè ki disponib</h2><a href="#chache" class="text-sm font-bold" style="color:var(--mintx)">Wè tout →</a></div>
+  <div class="grid gap-3">${[...PROS].sort(byVer).slice(0,3).map(card).join("")}</div>`;
+}
+
+function browse(){
+  const komList=st.dep?DEPT[st.dep]:[...new Set(Object.values(DEPT).flat())].sort();
+  app.innerHTML=`
+  <h1 class="font-extrabold text-2xl mt-5">Chèche yon travayè</h1>
+  ${isVip()?"":`<a href="#vip" class="card mt-3 p-3 flex items-center gap-3 text-sm"><span class="text-2xl">👑</span><span><b>Abònman VIP: ${VIP.toLocaleString("en-US")} HTG / mwa.</b> <span class="mu">Tout nimewo debloke, san peye ${PRIX} HTG chak fwa.</span></span></a>`}
+  <div class="flex gap-2 overflow-x-auto py-3 -mx-4 px-4">
+    <button class="chip ${st.cat?"":"on"}" onclick="st.cat='';list()">Tout</button>
+    ${CATS.map(c=>`<button class="chip ${st.cat===c.id?"on":""}" onclick="st.cat='${c.id}';list()">${c.ico} ${c.nom.split(" (")[0]}</button>`).join("")}
+  </div>
+  <div class="grid grid-cols-2 gap-2">
+    <label class="text-xs font-semibold mu">Depatman
+      <select id="fd" class="inp mt-1"><option value="">Tout depatman</option>${Object.keys(DEPT).map(d=>`<option ${st.dep===d?"selected":""}>${d}</option>`).join("")}</select></label>
+    <label class="text-xs font-semibold mu">Komin
+      <select id="fk" class="inp mt-1"><option value="">Tout komin</option>${komList.map(k=>`<option ${st.kom===k?"selected":""}>${k}</option>`).join("")}</select></label>
+  </div>
+  <p id="cnt" class="text-sm mu mt-4 mb-2"></p>
+  <div id="res" class="grid gap-3"></div>`;
+  $("#fd").onchange=e=>{st.dep=e.target.value;st.kom="";browse()};
+  $("#fk").onchange=e=>{st.kom=e.target.value;list()};
+  list();
+}
+function list(){
+  if(!$("#res"))return;
+  document.querySelectorAll(".chip").forEach((b,i)=>b.classList.toggle("on",(i===0&&!st.cat)||(i>0&&CATS[i-1].id===st.cat)));
+  const r=PROS.filter(p=>(!st.cat||p.cat===st.cat)&&(!st.dep||p.dep===st.dep)&&(!st.kom||p.kom===st.kom)).sort(byVer);
+  $("#cnt").textContent=r.length+(r.length===1?" pwofil jwenn":" pwofil jwenn");
+  $("#res").innerHTML=r.length?r.map(card).join(""):`<div class="card p-6 text-center"><div class="text-3xl">🔎</div><p class="font-bold mt-2">Pa gen pwofil pou kounye a</p><p class="text-sm mu">Eseye yon lòt komin oswa kategori.</p></div>`;
+}
+
+function reg(){
+  app.innerHTML=`
+  <h1 class="font-extrabold text-2xl mt-5">Enskripsyon travayè</h1>
+  <p class="mu text-sm mb-4">Gratis. Kreye pwofil ou epi patwon yo pral jwenn ou.</p>
+  <form id="rf" class="card p-4 grid gap-3" onsubmit="return false">
+    <label class="text-sm font-semibold">Non konplè<input id="rn" class="inp mt-1" required placeholder="Egz: Marie Joseph"></label>
+    <label class="text-sm font-semibold">Nimewo telefòn<input id="rt" class="inp mt-1" inputmode="tel" required placeholder="509 37 00 0000"></label>
+    <label class="text-sm font-semibold">Sèvis ou ofri<select id="rc" class="inp mt-1">${CATS.map(c=>`<option value="${c.id}">${c.ico} ${c.nom}</option>`).join("")}</select></label>
+    <div class="grid grid-cols-2 gap-2">
+      <label class="text-sm font-semibold">Depatman<select id="rd" class="inp mt-1">${Object.keys(DEPT).map(d=>`<option>${d}</option>`).join("")}</select></label>
+      <label class="text-sm font-semibold">Komin<select id="rk" class="inp mt-1"></select></label>
+    </div>
+    <label class="text-sm font-semibold">Ane eksperyans<input id="ra" type="number" min="0" max="50" value="1" class="inp mt-1"></label>
+    <label class="text-sm font-semibold">Pale de ou<textarea id="rb" rows="3" class="inp mt-1" placeholder="Di patwon yo sa ou konn fè…"></textarea></label>
+    <fieldset class="grid gap-2"><legend class="text-sm font-semibold mb-1">Chwazi plan ou</legend>
+      <label class="card p-3 flex gap-3 items-start cursor-pointer"><input type="radio" name="plan" value="gratis" checked class="mt-1"><span><b>Gratis</b> · 0 HTG<br><span class="text-sm mu">Pwofil estanda, ou parèt nan lis la.</span></span></label>
+      <label class="card p-3 flex gap-3 items-start cursor-pointer" style="border:2px solid #2563eb"><input type="radio" name="plan" value="ver" class="mt-1"><span><b>Pwofil Verifye & Rekòmande</b> · ${VER} HTG<br><span class="vb">Idantite Verifye ✓</span><br><span class="text-sm mu">Ou parèt an premye nan lis la, ak badj ble a ki montre patwon yo ou serye.</span></span></label></fieldset>
+    <label id="cinw" class="text-sm font-semibold hidden">Nimewo CIN oswa NIF<input id="rcin" class="inp mt-1" placeholder="Pou verifye idantite ou" autocomplete="off"></label>
+    <label class="text-sm flex gap-2 items-start"><input id="rg" type="checkbox" class="mt-1"> Mwen aksepte pou Dolimpia afiche pwofil mwen, nimewo m rete kache jiskaske yon patwon debloke l.</label>
+    <p id="re" class="text-sm text-red-500 hidden"></p>
+    <button id="rs" class="btn btn-mint text-lg">Kreye pwofil mwen gratis</button>
+  </form>`;
+  const fill=()=>$("#rk").innerHTML=DEPT[$("#rd").value].map(k=>`<option>${k}</option>`).join("");
+  $("#rd").onchange=fill;fill();
+  const upd=()=>{const v=document.querySelector("input[name=plan]:checked").value==="ver";$("#cinw").classList.toggle("hidden",!v);$("#rs").textContent=v?`Kontinye nan peman (${VER} HTG)`:"Kreye pwofil mwen gratis"};
+  document.querySelectorAll("input[name=plan]").forEach(r=>r.onchange=upd);
+  $("#rs").onclick=()=>{
+    const n=$("#rn").value.trim(),t=$("#rt").value.replace(/\D/g,"");
+    const er=$("#re");er.classList.remove("hidden");
+    if(n.length<3)return er.textContent="Tanpri mete non ou.";
+    if(t.length<8)return er.textContent="Nimewo telefòn la pa valid.";
+    if(!$("#rg").checked)return er.textContent="Ou dwe aksepte kondisyon yo.";
+    const full=t.length===8?"509"+t:t;
+    if(document.querySelector("input[name=plan]:checked").value==="ver"){
+      if(!/^[A-Za-z0-9-]{8,}$/.test($("#rcin").value.replace(/\s/g,"")))return er.textContent="Mete yon nimewo CIN oswa NIF valid pou verifye idantite ou.";
+      return payVer({id:Date.now(),nom:n,cat:$("#rc").value,dep:$("#rd").value,kom:$("#rk").value,an:+$("#ra").value||0,note:0,av:0,tel:full.replace(/^(\d{3})(\d{2})(\d{2})(\d{4}).*/,"$1 $2 $3 $4"),bio:$("#rb").value.trim()||"Nouvo sou Dolimpia."});
+    }
+    PROS.unshift({id:Date.now(),nom:n,cat:$("#rc").value,dep:$("#rd").value,kom:$("#rk").value,an:+$("#ra").value||0,note:0,av:0,tel:full.replace(/^(\d{3})(\d{2})(\d{2})(\d{4}).*/,"$1 $2 $3 $4"),bio:$("#rb").value.trim()||"Nouvo sou Dolimpia."});
+    $("#rf").innerHTML=`<div class="text-center p-4"><div class="text-5xl">🎉</div><h2 class="font-extrabold text-xl mt-2">Byenveni sou Dolimpia, ${esc(n.split(" ")[0])}!</h2><p class="mu mt-1">Pwofil ou kreye. Patwon yo ka jwenn ou kounye a.</p><a href="#chache" class="btn btn-navy mt-4">Wè pwofil mwen</a></div>`;
+  };
+}
+
+/* Modal peman */
+function modal(h){const m=$("#modal");m.innerHTML=h;m.classList.remove("hidden");m.onclick=e=>{if(e.target===m)closeM()}}
+function closeM(){$("#modal").classList.add("hidden")}
+let payM="MonCash";
+function pay(id){
+  const p=PROS.find(x=>x.id===id);
+  modal(`<div class="sheet card w-full max-w-md p-5 rounded-b-none sm:rounded-b-2xl" style="padding-bottom:calc(1.25rem + env(safe-area-inset-bottom,0px))">
+    <div class="flex justify-between items-start"><div><h2 class="font-extrabold text-xl">Debloke nimewo a</h2><p class="text-sm mu">${esc(p.nom)} · ${esc(p.kom)}</p></div><button onclick="closeM()" class="text-2xl leading-none mu" aria-label="Fèmen">×</button></div>
+    <p class="text-3xl font-extrabold mt-3" style="color:var(--mintx)">${PRIX} HTG</p>
+    <div class="grid grid-cols-2 gap-2 mt-3" id="pm">
+      <button class="chip on" data-m="MonCash">📱 MonCash</button><button class="chip" data-m="NatCash">📱 NatCash</button>
+    </div>
+    <ol class="text-sm mt-4 grid gap-1 mu list-decimal pl-5">
+      <li>Louvri <b id="pn">MonCash</b> sou telefòn ou.</li>
+      <li>Voye <b>${PRIX} HTG</b> sou nimewo Dolimpia: <b class="font-mono" style="color:var(--tx)">509 00 00 0000</b> <span class="text-xs">(demo)</span></li>
+      <li>Kopye kòd tranzaksyon an epi mete l anba a.</li>
+    </ol>
+    <input id="tx" class="inp mt-3 font-mono uppercase" placeholder="Kòd tranzaksyon" autocomplete="off">
+    <p id="te" class="text-sm text-red-500 mt-2 hidden"></p>
+    <button id="tb" class="btn btn-mint w-full mt-3 text-lg">Konfime & wè nimewo a</button>
+    <a href="#vip" class="block text-center text-sm font-bold mt-3" style="color:var(--mintx)">👑 Pito debloke tout nimewo ak VIP (${VIP.toLocaleString("en-US")} HTG / mwa)</a>
+  </div>`);
+  document.querySelectorAll("#pm .chip").forEach(b=>b.onclick=()=>{payM=b.dataset.m;document.querySelectorAll("#pm .chip").forEach(x=>x.classList.toggle("on",x===b));$("#pn").textContent=payM});
+  $("#tb").onclick=()=>{
+    const c=$("#tx").value.trim(),e=$("#te");
+    if(!/^[A-Za-z0-9]{6,}$/.test(c)){e.textContent="Kòd la dwe gen omwen 6 karaktè (lèt ak chif).";e.classList.remove("hidden");return}
+    $("#tb").disabled=true;$("#tb").textContent="Verifikasyon…";
+    setTimeout(()=>{ // demo: verifikasyon reyèl ap fèt sou sèvè nan yon pwochen etap
+      un.add(id);try{localStorage.setItem("dol_un",JSON.stringify([...un]))}catch(x){}
+      modal(`<div class="sheet card w-full max-w-md p-6 text-center rounded-b-none sm:rounded-b-2xl" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))">
+        <div class="text-5xl">✅</div><h2 class="font-extrabold text-xl mt-2">Nimewo debloke!</h2>
+        <p class="mu text-sm">${esc(p.nom)}</p>
+        <a href="tel:+${p.tel.replace(/\D/g,"")}" class="btn btn-mint w-full text-xl mt-4 font-mono">📞 ${p.tel}</a>
+        <button class="btn btn-out w-full mt-2" onclick="closeM()">Fèmen</button></div>`);
+      route();
+    },900);
+  };
+}
+
+function payVer(pro){
+  let m="MonCash";
+  modal(`<div class="sheet card w-full max-w-md p-5 rounded-b-none sm:rounded-b-2xl" style="padding-bottom:calc(1.25rem + env(safe-area-inset-bottom,0px))">
+    <div class="flex justify-between items-start"><div><h2 class="font-extrabold text-xl">Pwofil Verifye & Rekòmande</h2><p class="text-sm mu">${esc(pro.nom)}</p></div><button onclick="closeM()" class="text-2xl leading-none mu" aria-label="Fèmen">×</button></div>
+    <p class="text-3xl font-extrabold mt-3" style="color:#2563eb">${VER} HTG</p>
+    <span class="vb">Idantite Verifye ✓</span>
+    <div class="grid grid-cols-2 gap-2 mt-3" id="pm"><button class="chip on" data-m="MonCash">📱 MonCash</button><button class="chip" data-m="NatCash">📱 NatCash</button></div>
+    <ol class="text-sm mt-4 grid gap-1 mu list-decimal pl-5"><li>Louvri <b id="pn">MonCash</b> sou telefòn ou.</li><li>Voye <b>${VER} HTG</b> sou nimewo Dolimpia: <b class="font-mono" style="color:var(--tx)">509 00 00 0000</b> <span class="text-xs">(demo)</span></li><li>Mete kòd tranzaksyon an anba a.</li></ol>
+    <input id="tx" class="inp mt-3 font-mono uppercase" placeholder="Kòd tranzaksyon" autocomplete="off">
+    <p id="te" class="text-sm text-red-500 mt-2 hidden"></p>
+    <button id="tb" class="btn btn-navy w-full mt-3 text-lg">Konfime & verifye pwofil mwen</button>
+    <button class="block mx-auto text-sm mu mt-3 underline" onclick="PROS.unshift(pro);closeM();location.hash='chache'">Pito rete sou plan Gratis</button></div>`);
+  document.querySelectorAll("#pm .chip").forEach(b=>b.onclick=()=>{m=b.dataset.m;document.querySelectorAll("#pm .chip").forEach(x=>x.classList.toggle("on",x===b));$("#pn").textContent=m});
+  window.pro=pro;
+  $("#tb").onclick=()=>{
+    const c=$("#tx").value.trim(),e=$("#te");
+    if(!/^[A-Za-z0-9]{6,}$/.test(c)){e.textContent="Kòd la dwe gen omwen 6 karaktè (lèt ak chif).";e.classList.remove("hidden");return}
+    $("#tb").disabled=true;$("#tb").textContent="Verifikasyon…";
+    setTimeout(()=>{ // demo: verifikasyon peman ak dokiman ap fèt sou sèvè
+      pro.ver=true;PROS.unshift(pro);
+      modal(`<div class="sheet card w-full max-w-md p-6 text-center rounded-b-none sm:rounded-b-2xl" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))"><div class="text-5xl">🎉</div><h2 class="font-extrabold text-xl mt-2">Pwofil ou verifye!</h2><p class="mt-2"><span class="vb">Idantite Verifye ✓</span></p><p class="mu text-sm mt-2">Ou parèt an premye nan lis la, anlè tout lòt travayè yo.</p><a href="#chache" onclick="closeM()" class="btn btn-navy w-full mt-4">Wè pwofil mwen</a></div>`);
+    },900);
+  };
+}
+
+function vipPage(){
+  const on=isVip(),perks=["Tout nimewo telefòn debloke otomatikman","Pa gen peman 500 HTG pou chak travayè","Badj « Manm VIP » sou ekran ou",`Valab ${DAYS} jou apre peman an`];
+  app.innerHTML=`
+  <section class="hero rounded-3xl mt-4 p-6 text-center">
+    <div class="text-5xl">👑</div>
+    <h1 class="text-2xl font-extrabold mt-2">Abònman VIP Patwon</h1>
+    <p class="text-4xl font-extrabold mt-3 text-[#ffd76a]">${VIP.toLocaleString("en-US")} HTG<span class="text-base font-semibold text-white/80"> / mwa</span></p>
+    ${on?`<p class="mt-3 inline-block px-3 py-1 rounded-full bg-[#2fbf8f] text-[#06281d] font-bold text-sm">✅ Aktif jiska ${new Date(vipExp).toLocaleDateString("fr-FR")} (${daysLeft()} jou)</p>`:""}
+  </section>
+  <ul class="card p-4 mt-4 grid gap-3">${perks.map(x=>`<li class="flex gap-2"><span style="color:var(--mintx)">✔</span><span>${x}</span></li>`).join("")}</ul>
+  <p class="text-sm mu mt-3 px-1">Konpare: ${PRIX} HTG × 5 nimewo = ${(PRIX*5).toLocaleString("en-US")} HTG. Ak VIP, ou debloke pi plis nimewo pou ${VIP.toLocaleString("en-US")} HTG.</p>
+  <button class="btn btn-mint w-full text-lg mt-4" onclick="payVip()">${on?"Renouvle VIP":"Aktive VIP"} (${VIP.toLocaleString("en-US")} HTG)</button>
+  <a href="#chache" class="btn btn-out w-full mt-2">Chèche travayè</a>
+  ${on?`<button class="block mx-auto text-xs mu mt-4 underline" onclick="vipExp=0;try{localStorage.removeItem('dol_vip')}catch(e){}route()">Reyinisyalize VIP (demo)</button>`:""}`;
+}
+function payVip(){
+  let m="MonCash";
+  modal(`<div class="sheet card w-full max-w-md p-5 rounded-b-none sm:rounded-b-2xl" style="padding-bottom:calc(1.25rem + env(safe-area-inset-bottom,0px))">
+    <div class="flex justify-between items-start"><div><h2 class="font-extrabold text-xl">👑 Abònman VIP Patwon</h2><p class="text-sm mu">${DAYS} jou · tout nimewo debloke</p></div><button onclick="closeM()" class="text-2xl leading-none mu" aria-label="Fèmen">×</button></div>
+    <p class="text-3xl font-extrabold mt-3" style="color:var(--mintx)">${VIP.toLocaleString("en-US")} HTG</p>
+    <div class="grid grid-cols-2 gap-2 mt-3" id="pm"><button class="chip on" data-m="MonCash">📱 MonCash</button><button class="chip" data-m="NatCash">📱 NatCash</button></div>
+    <ol class="text-sm mt-4 grid gap-1 mu list-decimal pl-5"><li>Louvri <b id="pn">MonCash</b> sou telefòn ou.</li><li>Voye <b>${VIP.toLocaleString("en-US")} HTG</b> sou nimewo Dolimpia: <b class="font-mono" style="color:var(--tx)">509 00 00 0000</b> <span class="text-xs">(demo)</span></li><li>Mete kòd tranzaksyon an anba a.</li></ol>
+    <input id="tx" class="inp mt-3 font-mono uppercase" placeholder="Kòd tranzaksyon" autocomplete="off">
+    <p id="te" class="text-sm text-red-500 mt-2 hidden"></p>
+    <button id="tb" class="btn btn-mint w-full mt-3 text-lg">Konfime & aktive VIP</button></div>`);
+  document.querySelectorAll("#pm .chip").forEach(b=>b.onclick=()=>{m=b.dataset.m;document.querySelectorAll("#pm .chip").forEach(x=>x.classList.toggle("on",x===b));$("#pn").textContent=m});
+  $("#tb").onclick=()=>{
+    const c=$("#tx").value.trim(),e=$("#te");
+    if(!/^[A-Za-z0-9]{6,}$/.test(c)){e.textContent="Kòd la dwe gen omwen 6 karaktè (lèt ak chif).";e.classList.remove("hidden");return}
+    $("#tb").disabled=true;$("#tb").textContent="Verifikasyon…";
+    setTimeout(()=>{ // demo: verifikasyon reyèl ap fèt sou sèvè
+      vipExp=Math.max(Date.now(),vipExp)+DAYS*864e5;try{localStorage.setItem("dol_vip",String(vipExp))}catch(x){}
+      modal(`<div class="sheet card w-full max-w-md p-6 text-center rounded-b-none sm:rounded-b-2xl" style="padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))"><div class="text-5xl">👑</div><h2 class="font-extrabold text-xl mt-2">Byenveni nan VIP!</h2><p class="mu text-sm mt-1">Tout nimewo yo debloke kounye a. Valab jiska ${new Date(vipExp).toLocaleDateString("fr-FR")}.</p><a href="#chache" onclick="closeM()" class="btn btn-mint w-full mt-4">Wè travayè yo</a></div>`);
+      route();
+    },900);
+  };
+}
+
+function route(){
+  const h=location.hash.slice(1);
+  if(h==="chache")browse();else if(h==="enskripsyon")reg();else if(h==="vip")vipPage();else home();
+  badge();
+}
+window.addEventListener("hashchange",()=>{closeM();route();window.scrollTo(0,0)});
+route();
+</script>
+</body>
+</html>
