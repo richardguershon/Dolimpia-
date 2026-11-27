@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dolimpia – Tout sèvis pou kay ou, nan yon sèl klik</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+:root{color-scheme:light;--navy:#0b2545;--mint:#2fbf8f;--mintbg:#e6f8f1;--mintx:#0f7a58;--bg:#f6f9fc;--card:#fff;--tx:#0f1f33;--mu:#5b6b7f;--bd:#e2e8f0;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0a1424;--card:#111e33;--tx:#eaf1fb;--mu:#9fb0c6;--bd:#223350;--mintbg:#0f2e2a;--mintx:#5fe0b2}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0a1424;--card:#111e33;--tx:#eaf1fb;--mu:#9fb0c6;--bd:#223350;--mintbg:#0f2e2a;--mintx:#5fe0b2}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:#0b2545;z-index:30}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:1rem}
+.mu{color:var(--mu)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;font-weight:700;border-radius:.9rem;padding:.8rem 1.1rem;transition:transform .1s}
+.btn:active{transform:scale(.97)}.btn:disabled{opacity:.6}
+.btn-mint{background:var(--mint);color:#06281d}.btn-navy{background:var(--navy);color:#fff}.btn-out{border:2px solid var(--mint);color:var(--mintx)}
+.inp{width:100%;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:.75rem;padding:.7rem .8rem;font-size:1rem}
+.inp:focus{outline:2px solid var(--mint)}
+.chip{white-space:nowrap;border:1px solid var(--bd);background:var(--card);border-radius:999px;padding:.45rem .85rem;font-size:.85rem;font-weight:600}
+.chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.hero{background:linear-gradient(160deg,#0b2545,#13315c 60%,#0f6b57);color:#fff}
+.sheet{animation:up .22s ease-out}@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.vb{display:inline-flex;align-items:center;background:#1d4ed8;color:#fff;font-size:.72rem;font-weight:800;padding:.2rem .55rem;border-radius:999px;margin-top:.25rem}
+</style>
+</head>
+<body>
+<header class="sticky top-0 z-40 bg-[#0b2545] text-white" style="padding-top:env(safe-area-inset-top,0px)">
+  <div class="max-w-3xl mx-auto flex items-center justify-between px-3 py-3">
+    <a href="#akey" class="flex items-center gap-2 font-extrabold text-lg"><span class="w-8 h-8 rounded-xl bg-[#2fbf8f] text-[#06281d] grid place-items-center">D</span>Dolimpia</a>
+    <nav id="nav" class="flex gap-1 text-xs font-semibold items-center"></nav>
+  </div>
+  <div id="vb" class="hidden text-center text-xs font-bold py-1.5 px-3" style="background:linear-gradient(90deg,#ffd76a,#2fbf8f);color:#0b2545"></div>
+</header>
+<main id="app" class="max-w-3xl mx-auto px-4 pb-24"></main>
+<footer class="text-center text-xs mu pb-8 px-4">© 2026 Dolimpia · Fèt pou Ayiti 🇭🇹</footer>
+<div id="modal" class="hidden fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center"></div>
+<div id="toast" class="hidden fixed left-4 right-4 bottom-6 z-[60] max-w-md mx-auto text-center text-sm font-semibold rounded-xl px-4 py-3 bg-[#0b2545] text-white shadow-lg"></div>
+
+<script>
+const SB_URL="https://kjpyqxtcwvmdocbqewrl.supabase.co",SB_KEY="sb_publishable_B6B3si-YSWgVvFVGgiZYZw_FNz14qXr";
+const $=s=>document.querySelector(s),app=$("#app");
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+if(typeof supabase==="undefined"){app.innerHTML=`<p class="card p-6 mt-6 text-center">Pa ka konekte ak sèvè a. Verifye entènèt ou epi rafrechi paj la.</p>`;throw new Error("supabase lib")}
+const sb=supabase.createClient(SB_URL,SB_KEY);
+const CATS=[{nom:"Fanm menajèz",ico:"🧹"},{nom:"Nounou (gadyen timoun)",ico:"🧸"},{nom:"Kizinyèz / Kizinye",ico:"🍲"},{nom:"Lesivyè / Repasèz",ico:"👕"},{nom:"Swen granmoun aje",ico:"🤝"}];
+const DEPT={
+"Lwès":["Port-au-Prince","Delmas","Carrefour","Pétion-Ville","Tabarre","Cité Soleil","Kenscoff","Gressier","Léogâne","Petit-Goâve","Grand-Goâve","Cabaret","Arcahaie","Croix-des-Bouquets","Thomazeau","Ganthier","Fonds-Verrettes","Cornillon","Anse-à-Galets","Pointe-à-Raquette"],
+"Nò":["Okap","Limonade","Quartier-Morin","Plaine-du-Nord","Milot","Acul-du-Nord","Dondon","Saint-Raphaël","Ranquitte","Pignon","La Victoire","Pilate","Plaisance","Limbé","Bas-Limbé","Port-Margot","Borgne","Grande-Rivière-du-Nord","Bahon"],
+"Latibonit":["Gonayiv","Ennery","L’Estère","Marmelade","Saint-Michel-de-l’Attalaye","Saint-Marc","Verrettes","La Chapelle","Dessalines","Desdunes","Grande-Saline","Petite-Rivière-de-l’Artibonite","Gros-Morne","Anse-Rouge","Terre-Neuve"],
+"Sid":["Okay","Torbeck","Chantal","Camp-Perrin","Maniche","Île-à-Vache","Port-Salut","Saint-Jean-du-Sud","Arniquet","Saint-Louis-du-Sud","Aquin","Cavaillon","Roche-à-Bateaux","Port-à-Piment","Chardonnières","Les Anglais","Tiburon","Côteaux"],
+"Grand’Anse":["Jérémie","Abricots","Bonbon","Chambellan","Corail","Dame-Marie","Les Irois","Moron","Pestel","Roseaux","Anse-d’Hainault","Beaumont"],
+"Sant":["Hinche","Cerca-la-Source","Thomassique","Maïssade","Thomonde","Cerca-Carvajal","Mirebalais","Saut-d’Eau","Boucan-Carré","Lascahobas","Belladère","Savanette"],
+"Nòdès":["Fort-Liberté","Ferrier","Perches","Ouanaminthe","Capotille","Mont-Organisé","Trou-du-Nord","Caracol","Sainte-Suzanne","Terrier-Rouge","Vallières","Carice","Mombin-Crochu"],
+"Nòdwès":["Port-de-Paix","Bassin-Bleu","Chansolme","Jean-Rabel","La Tortue","Môle-Saint-Nicolas","Baie-de-Henne","Anse-à-Foleur","Saint-Louis-du-Nord","Bombardopolis"],
+"Sidès":["Jakmèl","Bainet","Côtes-de-Fer","La Vallée","Belle-Anse","Anse-à-Pitres","Grand-Gosier","Thiotte","Marigot","Cayes-Jacmel"],
+"Nip":["Miragoâne","Petite-Rivière-de-Nippes","Paillant","Fonds-des-Nègres","Anse-à-Veau","L’Asile","Petit-Trou-de-Nippes","Plaisance-du-Sud","Arnaud","Baradères","Grand-Boucan"]};
+const PRICE={unlock:500,vip:2500,verify:250},TITLE={unlock:"Debloke nimewo a",vip:"Abònman VIP Patwon",verify:"Pwofil Verifye & Rekòmande"};
+const ACC={nom:"Guershon Richard",MonCash:"509 4431 9131",NatCash:"509 4277 5739"};
+const S={user:null,admin:false,vipExp:null,unl:new Set(),pros:[],phones:{},ready:false,cat:"",dep:"",kom:""};
+const isVip=()=>S.vipExp&&new Date(S.vipExp)>new Date(),canSee=id=>isVip()||S.unl.has(id);
+const fmt=p=>p.replace(/^(\d{3})(\d{2})(\d{2})(\d{4})$/,"$1 $2 $3 $4"),ini=n=>n.split(/[\s-]+/).slice(0,2).map(w=>w[0]).join("").toUpperCase();
+const hue=id=>150+[...id].reduce((a,c)=>a+c.charCodeAt(0),0)%60;
+let tt;function toast(m){const t=$("#toast");t.textContent=m;t.classList.remove("hidden");clearTimeout(tt);tt=setTimeout(()=>t.classList.add("hidden"),4000)}
+const sheet=h=>`<div class="sheet card w-full max-w-md p-5 rounded-b-none sm:rounded-b-2xl" style="padding-bottom:calc(1.25rem + env(safe-area-inset-bottom,0px))"><button class="float-right text-2xl leading-none mu" onclick="closeM()" aria-label="Fèmen">×</button>${h}</div>`;
+function modal(h){const m=$("#modal");m.innerHTML=h;m.classList.remove("hidden");m.onclick=e=>{if(e.target===m)closeM()}}
+function closeM(){$("#modal").classList.add("hidden")}
+
+/* ---------- Done ---------- */
+async function loadPros(){const{data,error}=await sb.from("profiles").select("*").order("verified",{ascending:false}).order("created_at",{ascending:false});if(error)toast("Pa ka chaje pwofil yo: "+error.message);else S.pros=data}
+async function loadMe(){
+  const{data:{session}}=await sb.auth.getSession();S.user=session?.user||null;S.unl=new Set();S.vipExp=null;S.admin=false;S.phones={};
+  if(!S.user)return;
+  const[u,v,a]=await Promise.all([sb.from("unlocks").select("profile_id"),sb.from("vip").select("expires_at").maybeSingle(),sb.rpc("is_admin")]);
+  S.unl=new Set((u.data||[]).map(r=>r.profile_id));S.vipExp=v.data?.expires_at||null;S.admin=a.data===true;
+}
+async function refresh(){await Promise.all([loadPros(),loadMe()]);S.ready=true;route()}
+async function reveal(ids){await Promise.all(ids.map(async id=>{const{data}=await sb.rpc("get_phone",{p_profile:id});if(data)S.phones[id]=data}))}
+
+/* ---------- Koneksyon ---------- */
+function login(after){
+  modal(sheet(`<h2 class="font-extrabold text-xl">Konekte</h2><p class="text-sm mu mb-3">Mete imèl ou. Nou voye w yon kòd pou konfime.</p><input id="em" type="email" class="inp" placeholder="imel@egzanp.com" autocomplete="email"><button id="lb" class="btn btn-mint w-full mt-3">Voye kòd la</button>`));
+  $("#lb").onclick=async()=>{const email=$("#em").value.trim();if(!/^\S+@\S+\.\S+$/.test(email))return toast("Imèl la pa valid.");
+    $("#lb").disabled=true;const{error}=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:true}});
+    if(error){$("#lb").disabled=false;return toast(error.message)}codeStep(email,after)};
+}
+function codeStep(email,after){
+  modal(sheet(`<h2 class="font-extrabold text-xl">Verifye imèl ou</h2><p class="text-sm mu mb-3">Nou voye yon imèl sou <b>${esc(email)}</b>. Louvri l epi tape lyen an pou konekte. Si imèl la gen yon kòd, mete l anba a. Gade nan Spam tou.</p><input id="cd" class="inp font-mono text-center text-xl" inputmode="numeric" maxlength="10" placeholder="••••••" autocomplete="one-time-code"><button id="cb" class="btn btn-mint w-full mt-3">Konfime</button>`));
+  $("#cb").onclick=async()=>{const token=$("#cd").value.trim();$("#cb").disabled=true;
+    const{error}=await sb.auth.verifyOtp({email,token,type:"email"});
+    if(error){$("#cb").disabled=false;return toast("Kòd la pa bon oswa li ekspire.")}
+    closeM();await refresh();toast("Ou konekte ✓");after&&after()};
+}
+async function logout(){await sb.auth.signOut();location.hash="akey";await refresh()}
+
+/* ---------- Peman ---------- */
+function openPay(kind,pid){
+  if(!S.user)return login(()=>openPay(kind,pid));
+  let m="MonCash";
+  modal(sheet(`<h2 class="font-extrabold text-xl">${TITLE[kind]}</h2><p class="text-3xl font-extrabold mt-2" style="color:var(--mintx)">${PRICE[kind].toLocaleString("en-US")} HTG</p>
+  <div class="grid grid-cols-2 gap-2 mt-3" id="pm"><button class="chip on" data-m="MonCash">📱 MonCash</button><button class="chip" data-m="NatCash">📱 NatCash</button></div>
+  <div id="acc"></div>
+  <input id="tx" class="inp mt-3 font-mono uppercase" placeholder="Kòd tranzaksyon" autocomplete="off">
+  <button id="tb" class="btn btn-mint w-full mt-3 text-lg">Voye peman pou verifikasyon</button>
+  <p class="text-xs mu mt-2">Nou verifye peman an anvan nou aktive sèvis la.</p>`));
+  const acc=()=>{$("#acc").innerHTML=`<p class="text-sm mu mt-3">1. Voye montan an sou kont ${m} sa a:</p><div class="card p-3 mt-1 flex items-center justify-between gap-2"><div><div class="text-xs mu">Non kont lan</div><b>${ACC.nom}</b><div class="font-mono font-bold text-lg" style="color:var(--mintx)">${ACC[m]}</div></div><button type="button" class="btn btn-out !py-2 text-sm" id="cpb">Kopye</button></div><p class="text-sm mu mt-2">2. Mete kòd tranzaksyon an anba a.</p>`;
+    $("#cpb").onclick=e=>{try{navigator.clipboard.writeText(ACC[m].replace(/\s/g,""))}catch(x){}e.target.textContent="Kopye ✓"}};
+  acc();
+  document.querySelectorAll("#pm .chip").forEach(b=>b.onclick=()=>{m=b.dataset.m;document.querySelectorAll("#pm .chip").forEach(x=>x.classList.toggle("on",x===b));acc()});
+  $("#tb").onclick=async()=>{const code=$("#tx").value.trim();if(!/^[A-Za-z0-9]{6,}$/.test(code))return toast("Kòd la dwe gen omwen 6 karaktè.");
+    $("#tb").disabled=true;
+    const{error}=await sb.rpc("request_payment",{p_kind:kind,p_profile:pid||null,p_method:m.toLowerCase(),p_code:code});
+    if(error){$("#tb").disabled=false;return toast(error.code==="23505"?"Kòd sa a deja itilize.":error.message)}
+    modal(sheet(`<div class="text-center"><div class="text-5xl">⏳</div><h2 class="font-extrabold text-xl mt-2">Peman resevwa!</h2><p class="mu text-sm mt-2">Nou ap verifye l. Lè l aprouve, sèvis la aktive otomatikman. Tann kèk minit epi rafrechi.</p><button class="btn btn-navy w-full mt-4" onclick="closeM();refresh()">Fèmen</button></div>`))};
+}
+function unlock(id){S.user?openPay("unlock",id):login(()=>openPay("unlock",id))}
+
+/* ---------- Paj yo ---------- */
+function card(p){
+  const c=CATS.find(x=>x.nom===p.service)||{ico:"👤"},ph=S.phones[p.id];
+  return `<article class="card p-4 flex gap-3" ${p.verified?'style="border:2px solid #2563eb"':""}>
+  <div class="w-16 h-16 shrink-0 rounded-2xl grid place-items-center text-white font-extrabold text-xl" style="background:linear-gradient(135deg,hsl(${hue(p.id)},60%,32%),hsl(${hue(p.id)},65%,45%))">${esc(ini(p.name))}</div>
+  <div class="min-w-0 flex-1"><h3 class="font-bold leading-tight">${esc(p.name)}</h3>
+  ${p.verified?`<span class="vb">Idantite Verifye ✓</span> <span class="text-xs font-bold text-amber-500">⭐ Rekòmande</span>`:""}
+  <p class="text-sm" style="color:var(--mintx)">${c.ico} ${esc(p.service)}</p>
+  <p class="text-sm mu mt-1">📍 ${esc(p.commune)}, ${esc(p.dept)} · ${p.years} an eksperyans</p>
+  <p class="text-sm mt-1">${p.reviews?`<span class="text-amber-500 font-bold">★ ${Number(p.rating).toFixed(1)}</span> <span class="mu">(${p.reviews} evalyasyon)</span>`:`<span class="mu">Nouvo pwofil</span>`}</p>
+  ${p.bio?`<p class="text-sm mu mt-2 line-clamp-2">${esc(p.bio)}</p>`:""}
+  <div class="mt-3 flex items-center gap-2 flex-wrap">${ph?`<a class="btn btn-mint !py-2 text-sm" href="tel:+${esc(ph)}">📞 ${esc(fmt(ph))}</a>`:canSee(p.id)?`<span class="text-sm mu">Chajman nimewo a…</span>`:`<span class="font-mono text-sm px-3 py-2 rounded-lg" style="background:var(--mintbg)">🔒 509 37** ****</span><button class="btn btn-navy !py-2 text-sm" onclick="unlock('${p.id}')">Debloke Nimewo (500 HTG)</button>`}</div>
+  </div></article>`;
+}
+const opts=(a,f)=>`<option value="">${f}</option>`+a.map(x=>`<option>${esc(x)}</option>`).join("");
+const komOpts=(d,f)=>d?opts(DEPT[d],f):`<option value="">${f}</option>`+Object.entries(DEPT).map(([k,v])=>`<optgroup label="${esc(k)}">${v.map(x=>`<option>${esc(x)}</option>`).join("")}</optgroup>`).join("");
+
+function home(){
+  app.innerHTML=`<section class="hero rounded-3xl mt-4 p-6 sm:p-10"><p class="text-[#7ff0c6] font-semibold text-sm">🇭🇹 10 depatman · 140 komin</p>
+  <h1 class="text-4xl sm:text-5xl font-extrabold mt-2">Dolimpia</h1><p class="text-lg sm:text-xl mt-2 text-white/90">Tout sèvis pou kay ou, nan yon sèl klik</p>
+  <div class="mt-6 grid gap-3 sm:grid-cols-2"><a href="#chache" class="btn btn-mint text-lg !py-4">🏠 Mwen se yon Patwon</a><a href="#enskripsyon" class="btn text-lg !py-4 bg-white text-[#0b2545]">👷 Mwen se yon Travayè</a></div>
+  <p class="text-sm text-white/70 mt-3">Wè pwofil yo gratis. Peye 500 HTG sèlman pou debloke yon nimewo.</p></section>
+  <h2 class="font-extrabold text-xl mt-8 mb-3">Kategori sèvis</h2><div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+  ${CATS.map((c,i)=>`<button onclick="S.cat=CATS[${i}].nom;location.hash='chache'" class="card p-4 text-left active:scale-95 transition"><div class="text-3xl">${c.ico}</div><div class="font-bold mt-2 text-sm">${c.nom}</div></button>`).join("")}</div>
+  <h2 class="font-extrabold text-xl mt-8 mb-3">Travayè ki disponib</h2><div class="grid gap-3">${S.ready?S.pros.slice(0,3).map(card).join("")||`<p class="mu">Pa gen pwofil ankò.</p>`:`<p class="mu">Chajman…</p>`}</div>`;
+}
+function browse(){
+  app.innerHTML=`<h1 class="font-extrabold text-2xl mt-5">Chèche yon travayè</h1>
+  ${isVip()?"":`<a href="#vip" class="card mt-3 p-3 flex items-center gap-3 text-sm"><span class="text-2xl">👑</span><span><b>VIP: 2,500 HTG / mwa.</b> <span class="mu">Tout nimewo debloke.</span></span></a>`}
+  <div class="grid gap-2 mt-3"><select id="fs" class="inp">${opts(CATS.map(c=>c.nom),"Tout sèvis")}</select>
+  <div class="grid grid-cols-2 gap-2"><select id="fd" class="inp">${opts(Object.keys(DEPT),"Tout depatman")}</select><select id="fk" class="inp">${komOpts(S.dep,"Tout komin")}</select></div></div>
+  <p id="cnt" class="text-sm mu mt-4 mb-2"></p><div id="res" class="grid gap-3"></div>`;
+  $("#fs").value=S.cat;$("#fd").value=S.dep;$("#fk").value=S.kom;
+  $("#fs").onchange=e=>{S.cat=e.target.value;list()};$("#fd").onchange=e=>{S.dep=e.target.value;S.kom="";$("#fk").innerHTML=komOpts(S.dep,"Tout komin");list()};$("#fk").onchange=e=>{S.kom=e.target.value;list()};
+  list();
+}
+function list(){
+  const r=S.pros.filter(p=>(!S.cat||p.service===S.cat)&&(!S.dep||p.dept===S.dep)&&(!S.kom||p.commune===S.kom));
+  const draw=()=>{if(!$("#res"))return;$("#cnt").textContent=S.ready?r.length+" pwofil jwenn":"Chajman…";$("#res").innerHTML=r.length?r.map(card).join(""):`<div class="card p-6 text-center"><div class="text-3xl">🔎</div><p class="font-bold mt-2">Pa gen pwofil pou kounye a</p></div>`};
+  draw();
+  const need=r.filter(p=>canSee(p.id)&&!S.phones[p.id]).slice(0,30).map(p=>p.id);
+  if(need.length)reveal(need).then(draw);
+}
+function reg(){
+  if(!S.user){app.innerHTML=`<div class="card p-6 mt-6 text-center"><div class="text-4xl">👷</div><h1 class="font-extrabold text-xl mt-2">Enskripsyon travayè</h1><p class="mu text-sm mt-1">Konekte ak imèl ou pou kreye pwofil ou gratis.</p><button class="btn btn-mint mt-4" onclick="login(reg)">Konekte</button></div>`;return}
+  app.innerHTML=`<h1 class="font-extrabold text-2xl mt-5">Enskripsyon travayè</h1><p class="mu text-sm mb-4">Gratis. Nimewo ou rete kache jiskaske yon patwon peye pou wè l.</p>
+  <form id="rf" class="card p-4 grid gap-3" onsubmit="return false">
+  <label class="text-sm font-semibold">Non konplè<input id="rn" class="inp mt-1" placeholder="Egz: Marie Joseph"></label>
+  <label class="text-sm font-semibold">Nimewo telefòn<input id="rt" class="inp mt-1" inputmode="tel" placeholder="37 00 0000"></label>
+  <label class="text-sm font-semibold">Sèvis ou ofri<select id="rc" class="inp mt-1">${CATS.map(c=>`<option>${c.nom}</option>`).join("")}</select></label>
+  <div class="grid grid-cols-2 gap-2"><label class="text-sm font-semibold">Depatman<select id="rd" class="inp mt-1">${opts(Object.keys(DEPT),"Chwazi…")}</select></label><label class="text-sm font-semibold">Komin<select id="rk" class="inp mt-1" disabled><option value="">Depatman an premye</option></select></label></div>
+  <label class="text-sm font-semibold">Ane eksperyans<input id="ra" type="number" min="0" max="60" value="1" class="inp mt-1"></label>
+  <label class="text-sm font-semibold">Pale de ou<textarea id="rb" rows="3" maxlength="400" class="inp mt-1"></textarea></label>
+  <fieldset class="grid gap-2"><legend class="text-sm font-semibold mb-1">Chwazi plan ou</legend>
+  <label class="card p-3 flex gap-3 items-start"><input type="radio" name="plan" value="g" checked class="mt-1"><span><b>Gratis</b> · 0 HTG<br><span class="text-sm mu">Pwofil estanda.</span></span></label>
+  <label class="card p-3 flex gap-3 items-start" style="border:2px solid #2563eb"><input type="radio" name="plan" value="v" class="mt-1"><span><b>Pwofil Verifye & Rekòmande</b> · 250 HTG<br><span class="vb">Idantite Verifye ✓</span><br><span class="text-sm mu">Ou parèt an premye nan lis la.</span></span></label></fieldset>
+  <label id="cinw" class="text-sm font-semibold hidden">Nimewo CIN oswa NIF<input id="rcin" class="inp mt-1" autocomplete="off"></label>
+  <p id="re" class="text-sm text-red-500 hidden"></p><button id="rs" class="btn btn-mint text-lg">Kreye pwofil mwen gratis</button></form>`;
+  $("#rd").onchange=()=>{const d=$("#rd").value;$("#rk").disabled=!d;$("#rk").innerHTML=d?opts(DEPT[d],`Chwazi komin (${DEPT[d].length})`):`<option value="">Depatman an premye</option>`};
+  const upd=()=>{const v=document.querySelector("input[name=plan]:checked").value==="v";$("#cinw").classList.toggle("hidden",!v);$("#rs").textContent=v?"Kontinye nan peman (250 HTG)":"Kreye pwofil mwen gratis"};
+  document.querySelectorAll("input[name=plan]").forEach(r=>r.onchange=upd);
+  $("#rs").onclick=async()=>{
+    const er=$("#re"),bad=m=>{er.textContent=m;er.classList.remove("hidden")},v=document.querySelector("input[name=plan]:checked").value==="v";
+    const n=$("#rn").value.trim(),t=$("#rt").value.replace(/\D/g,""),cin=$("#rcin").value.replace(/\s/g,"");
+    if(n.length<3)return bad("Mete non ou.");if(t.length<8)return bad("Nimewo telefòn la pa valid.");
+    if(!$("#rd").value||!$("#rk").value)return bad("Chwazi depatman ak komin ou.");
+    if(v&&!/^[A-Za-z0-9-]{8,}$/.test(cin))return bad("Mete yon CIN oswa NIF valid.");
+    $("#rs").disabled=true;
+    const{data:pid,error}=await sb.rpc("register_worker",{p_name:n,p_phone:t,p_service:$("#rc").value,p_dept:$("#rd").value,p_commune:$("#rk").value,p_years:+$("#ra").value||0,p_bio:$("#rb").value.trim(),p_id_number:v?cin:null});
+    if(error){$("#rs").disabled=false;return bad(error.code==="23505"?"Nimewo sa a deja enskri.":error.message)}
+    await loadPros();
+    if(v)return openPay("verify",pid);
+    $("#rf").innerHTML=`<div class="text-center p-4"><div class="text-5xl">🎉</div><h2 class="font-extrabold text-xl mt-2">Byenveni sou Dolimpia!</h2><p class="mu mt-1">Pwofil ou kreye. Patwon yo ka jwenn ou kounye a.</p><a href="#chache" class="btn btn-navy mt-4" onclick="S.cat=S.dep=S.kom=''">Wè pwofil mwen</a></div>`;
+  };
+}
+async function vipPage(){
+  const on=isVip();
+  app.innerHTML=`<section class="hero rounded-3xl mt-4 p-6 text-center"><div class="text-5xl">👑</div><h1 class="text-2xl font-extrabold mt-2">Abònman VIP Patwon</h1><p class="text-4xl font-extrabold mt-3 text-[#ffd76a]">2,500 HTG<span class="text-base font-semibold text-white/80"> / mwa</span></p>
+  ${on?`<p class="mt-3 inline-block px-3 py-1 rounded-full bg-[#2fbf8f] text-[#06281d] font-bold text-sm">✅ Aktif jiska ${new Date(S.vipExp).toLocaleDateString("fr-FR")}</p>`:""}</section>
+  <ul class="card p-4 mt-4 grid gap-3">${["Tout nimewo telefòn debloke otomatikman","Pa gen peman 500 HTG pou chak travayè","Badj « Manm VIP » sou ekran ou","Valab 30 jou apre aprobasyon peman an"].map(x=>`<li class="flex gap-2"><span style="color:var(--mintx)">✔</span><span>${x}</span></li>`).join("")}</ul>
+  <button class="btn btn-mint w-full text-lg mt-4" onclick="openPay('vip')">${on?"Renouvle VIP":"Aktive VIP"} (2,500 HTG)</button><div id="mp"></div>`;
+  if(!S.user)return;
+  const{data}=await sb.from("payments").select("kind,amount,method,status,created_at").eq("user_id",S.user.id).order("created_at",{ascending:false}).limit(8);
+  if(data?.length&&$("#mp"))$("#mp").innerHTML=`<h2 class="font-extrabold mt-6 mb-2">Peman mwen yo</h2><div class="grid gap-2">${data.map(p=>`<div class="card p-3 text-sm flex justify-between gap-2"><span>${TITLE[p.kind]} · ${p.amount} HTG · ${p.method}</span><b style="color:${p.status==="approved"?"var(--mintx)":p.status==="rejected"?"#dc2626":"#d97706"}">${p.status==="approved"?"Aprouve":p.status==="rejected"?"Rejte":"Annatant"}</b></div>`).join("")}</div>`;
+}
+async function adminPage(){
+  if(!S.admin){app.innerHTML=`<div class="card p-6 mt-6 text-center">Aksè refize.</div>`;return}
+  app.innerHTML=`<h1 class="font-extrabold text-2xl mt-5">Peman annatant</h1><div id="ap" class="grid gap-3 mt-3"><p class="mu">Chajman…</p></div>`;
+  const{data,error}=await sb.from("payments").select("*,profiles(name)").eq("status","pending").order("created_at");
+  if(error)return toast(error.message);
+  $("#ap").innerHTML=data.length?data.map(p=>`<div class="card p-4 text-sm"><b>${TITLE[p.kind]}</b> · ${p.amount} HTG<br>${p.method==="moncash"?"MonCash":"NatCash"} · kòd: <b class="font-mono">${esc(p.tx_code)}</b><br><span class="mu">${p.profiles?.name?esc(p.profiles.name)+" · ":""}${new Date(p.created_at).toLocaleString("fr-FR")}</span>
+  <div class="grid grid-cols-2 gap-2 mt-3"><button class="btn btn-mint !py-2" onclick="decide('${p.id}',true)">✓ Aprouve</button><button class="btn btn-out !py-2" onclick="decide('${p.id}',false)">✕ Rejte</button></div></div>`).join(""):`<div class="card p-6 text-center mu">Pa gen peman annatant.</div>`;
+}
+async function decide(id,ok){const{error}=await sb.rpc("decide_payment",{p_id:id,p_ok:ok});if(error)return toast(error.message);toast(ok?"Aprouve ✓":"Rejte");adminPage()}
+
+/* ---------- Header + routè ---------- */
+function hdr(){
+  $("#nav").innerHTML=`<a href="#chache" class="px-2 py-2 rounded-lg hover:bg-white/10">Chèche</a><a href="#vip" class="px-2 py-2 rounded-lg text-[#ffd76a]">👑 VIP</a>${S.admin?`<a href="#admin" class="px-2 py-2 rounded-lg bg-white/10">Admin</a>`:""}${S.user?`<button onclick="logout()" class="px-2 py-2 rounded-lg bg-white/10">Soti</button>`:`<button onclick="login()" class="px-2 py-2 rounded-lg bg-[#2fbf8f] text-[#06281d]">Konekte</button>`}`;
+  const b=$("#vb");if(isVip()){b.classList.remove("hidden");b.textContent=`👑 Manm VIP · tout nimewo debloke · ${Math.ceil((new Date(S.vipExp)-Date.now())/864e5)} jou ki rete`}else b.classList.add("hidden");
+}
+function route(){const h=location.hash.slice(1);({chache:browse,enskripsyon:reg,vip:vipPage,admin:adminPage}[h]||home)();hdr()}
+addEventListener("hashchange",()=>{closeM();route();scrollTo(0,0)});
+route();refresh();
+</script>
+</body>
+</html>
